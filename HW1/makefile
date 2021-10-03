@@ -5,7 +5,7 @@ CFLAGS = -g -Wall
 	$(CC) $(CFLAGS) $^ -o $@
 
 do:
-	./0811562  testcase
+	./0811562  sample.in
 
 clean:
 	rm ./0811562
