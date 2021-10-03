@@ -8,4 +8,4 @@ do:
 	./0811562  sample.in
 
 clean:
-	rm ./0811562
+	rm 0811562
