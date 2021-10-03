@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#define MAX_SIZE 1000
+#define MAX_SIZE 10000
 
 typedef struct{
     int column_index;
@@ -44,6 +44,8 @@ void printMatrixInfo(matrix *A){
     printf("Column of Matrix: %d\n", A->column);
     printf("Row of Matrix: %d\n", A->row);
     printf("Non Zero Term of Matrix: %d\n", A->count);
+    printf("The content of the matrix:\n");
+    printMatrix(A);
 }
 
 void matrixTranspose(matrix *A){
@@ -55,8 +57,6 @@ void matrixTranspose(matrix *A){
     int temp = A->column;
     A->column = A->row;
     A->row = temp;
-    printMatrixInfo(A);
-    printMatrix(A);
 }
 
 int main(){
@@ -74,7 +74,7 @@ int main(){
 
     //read all line into buffer
     char buffer[MAX_SIZE];
-    const char *filename = "testcase";
+    const char *filename = "sample.in";
     FILE *input = fopen(filename, "r");
     while(fscanf(input, "%s", buffer)!=EOF){
         //printf("%s: ", buffer);
@@ -119,8 +119,7 @@ int main(){
     B->row = store[1];
     printMatrixInfo(A);
     printMatrixInfo(B);
-    printMatrix(A);
-    printMatrix(B);
     matrixTranspose(A);
+    printMatrixInfo(A);
     return 0;
 }
