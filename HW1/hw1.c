@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
 #include <string.h>
 #define MAX_SIZE 10000
 
@@ -43,7 +42,7 @@ void printMatrix(matrix *A){
 
 void printNonZeroTerm(matrix *A){
     for (int i = 0; i < A->count;i++){
-        printf("value = %d, at column = %d, row = %d\n", A->term[i].value, A->term[i].column_index, A->term[i].row_index);
+        printf("value = %d, at row = %d, column = %d\n", A->term[i].value, A->term[i].row_index, A->term[i].column_index);
     }
 }
 
@@ -59,7 +58,7 @@ void printMatrixInfo(matrix *A){
 
 matrix *matrixTranspose(matrix *A){
     //allocate the mamory size to store the transpose matrix;
-    matrix *newMatrix = malloc(sizeof(matrix));
+    matrix *newMatrix = (matrix *)malloc(sizeof(matrix));
     newMatrix->column = A->row;
     newMatrix->row = A->column;
     newMatrix->count = A->count;
@@ -85,7 +84,7 @@ matrix *matrixTranspose(matrix *A){
 void readfile(matrix *A, matrix *B, matrix **matrixptr, char *filename){
     //temp array to store the last value of the column and row value
     //store[0] = column, store[1] = row
-    int *store = malloc(sizeof(int) * 2);
+    int *store = (int *)malloc(sizeof(int) * 2);
 
     //read string into buffer
     char buffer[MAX_SIZE];
@@ -135,31 +134,100 @@ void readfile(matrix *A, matrix *B, matrix **matrixptr, char *filename){
     B->row = store[1];
 }
 
-/*
-matrix *matrixMultiplication(matrix *A, matrix *B){
-    
+void PutSum(matrix *result, int *totalcount, int row, int column, int *sum){
+    //make sure that the sum isn't zero
+    if((*sum)!=0){
+        result->term[++(*totalcount)].row_index = row;
+        result->term[*totalcount].column_index = column;
+        result->term[*totalcount].value = *sum;
+        
+        //init sum to zero
+        *sum = 0;
+    }
 }
-*/
+
+matrix *matrixMultiplication(matrix *A, matrix *B){
+    matrix *Btranspose = matrixTranspose(B);
+
+    //matrix to return matrix A * matrix B
+    matrix *result = (matrix *)malloc(sizeof(matrix));
+
+    int i, j, totalcount, column;
+    int row_begin = 1;
+    int row = A->term[0].row_index;
+    int sum = 0;
+
+    A->term[A->count + 1].row_index = A->row;
+    Btranspose->term[B->count+1].row_index = B->column;
+    Btranspose->term[B->count + 1].column_index = 0;
+
+    for (i = 0; i < A->count;){
+        sum = 0;
+        column = Btranspose->term[0].row_index;
+        for (j = 0; j < Btranspose->count+1;){
+            if(A->term[i].row_index!=row){
+                PutSum(result, &totalcount, row, column, &sum);
+                
+                //since per row of A need to dot row B, so go back to the start of the row
+                i = row_begin;
+
+                //since the corresponeing row element for A matrix become all zero
+                //let B^T go to the next row
+                for (; Btranspose->term[j].row_index != column;j++);
+                column = Btranspose[j].row;
+            }
+
+            else if(Btranspose->term[j].row_index!=column){
+                PutSum(result, &totalcount, row, column, &sum);
+                i = row_begin;
+                column = Btranspose->term[j].row_index;
+            }
+
+            else{
+                if(A->term[i].column_index<Btranspose->term[j].column_index){
+                    i++;
+                }
+                else if(A->term[i].column_index>Btranspose->term[j].column_index){
+                    j++;
+                }
+                else if(A->term[i].column_index==Btranspose->term[j].column_index){
+                    sum += A->term[i].value * Btranspose->term[j].value;
+                    i++;
+                    j++;
+                }
+            }
+        }
+        for (; A->term[i].row_index == row;i++);
+        row_begin = i;
+        row = A->term[i].row_index;
+    }
+    result->row = A->row;
+    result->column = B->column;
+    result->count = totalcount;
+
+    return result;
+}
 
 int main(int argc, char *argv[]){
-    matrix *A = malloc(sizeof(matrix));
-    matrix *B = malloc(sizeof(matrix));
+
+    char *filename = *(argv + 1);
+    //char *outputName = *(argv + 2);
+
+    matrix *A = (matrix *)malloc(sizeof(matrix));
+    matrix *B = (matrix *)malloc(sizeof(matrix));
     matrix **matrixptr = &A;
 
     //initialize matrix A and B
     initMatrix(&A);
     initMatrix(&B);
 
-
-    char *filename = *(argv + 1);
-    char *outputName = *(argv + 2);
     readfile(A, B, matrixptr, filename);
 
     printMatrixInfo(A);
     printMatrixInfo(B);
-    matrix *Atranspose = matrixTranspose(A);
-    printMatrixInfo(Atranspose);
-    matrix *Btranspose = matrixTranspose(B);
-    printMatrixInfo(Btranspose);
+
+    matrix *C = matrixMultiplication(A, B);
+    printMatrixInfo(C);
+
     return 0;
 }
