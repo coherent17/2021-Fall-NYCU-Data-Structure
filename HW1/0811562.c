@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#define MAX_SIZE 10000
+#define MAX_SIZE 100000
 
 typedef struct{
     int column_index;
@@ -15,8 +15,11 @@ typedef struct{
 } matrix;
 
 void initMatrix(matrix **A){
+    //hope the column and the row start from zero
     (*A)->array[0].row_index = 0;
     (*A)->array[0].column_index = -1;
+
+    //the non-zero term count
     (*A)->array[0].value = 0;
 }
 
@@ -41,11 +44,12 @@ void readfile(matrix *A, matrix *B, matrix **matrixptr, char *filename){
         //meet "B"
         else if(strcmp(buffer, "B")==0){
             //correct the true column and row for A
+            //since start from index zero, the real column and row should plus one
             A->array[0].column_index = store[0]+1;
             A->array[0].row_index = store[1]+1;
 
             fscanf(input, "%s", buffer); //read " ;"
-            matrixptr = &B;
+            matrixptr = &B; //change the pointer to the matrix B to construct matrix B
         }
 
         //meet ; and the end of the row
@@ -59,7 +63,6 @@ void readfile(matrix *A, matrix *B, matrix **matrixptr, char *filename){
         //construct matrix
         else if(strcmp(buffer,"0")==0){
             (*matrixptr)->array[0].column_index+= 1;
-            //(*matrixptr)->count++;
         }
         else{
             (*matrixptr)->array[0].column_index+= 1;
@@ -128,6 +131,27 @@ matrix *Transpose(matrix *A){
                     newCount++;
                 }
             }
+        }
+    }
+    return result;
+}
+
+matrix *FastTranspose(matrix *A){
+    matrix *result = (matrix *)malloc(sizeof(matrix));
+    int i, j, rowTerms[MAX_SIZE] = {0}, startPos[MAX_SIZE]={1};
+
+    if(A->array[0].column_index>0){
+        for (i = 0; i <= A->array[0].value;i++){
+            rowTerms[A->array[i].column_index]++;
+        }
+        for (i = 1; i < A->array[0].column_index;i++){
+            startPos[i] = startPos[i - 1] + rowTerms[i - 1];
+        }
+        for (i = 0; i <= A->array[0].value;i++){
+            j = startPos[A->array[i].column_index]++;
+            result->array[j].row_index = A->array[i].column_index;
+            result->array[j].column_index = A->array[i].row_index;
+            result->array[j].value = A->array[i].value;
         }
     }
     return result;
@@ -219,14 +243,16 @@ int main(int argc, char *argv[]){
         result = Multiply(A, B);
     }
     else if(m==p){
-        result = Multiply(Transpose(A), B);
+        result = Multiply(FastTranspose(A), B);
     }
     else if(n==q){
-        result = Multiply(A, Transpose(B));
+        result = Multiply(A, FastTranspose(B));
     }
     else if(m==q){
-        result = Multiply(Transpose(A), Transpose(B));
+        result = Multiply(FastTranspose(A), FastTranspose(B));
     }
+
+    //printMatrixInfo(result);
 
     FILE *outputfile;
     outputfile = fopen(outputName, "w");
@@ -244,5 +270,8 @@ int main(int argc, char *argv[]){
         fprintf(outputfile, ";\n");
     }
     fclose(outputfile);
+    free(A);
+    free(B);
+    free(result);
     return 0;
 }
