@@ -1,9 +1,9 @@
 CC = gcc
 CFLAGS = -g -Wall 
 
-0811562.exe: hw1.c
-	$(CC) $(CFLAGS) $^ -o $@
+0811562: 0811562.c
+	$(CC) $(CFLAGS) $< -o $@
 
 
 clean:
-	rm 0811562.exe
+	rm 0811562
