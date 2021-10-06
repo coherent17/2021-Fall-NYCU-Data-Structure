@@ -112,6 +112,7 @@ void printMatrixInfo(matrix *A){
 }
 
 
+//time complexity: O(column * non-zero count)
 matrix *Transpose(matrix *A){
     //allocate the memory size to store the transpose result
     matrix *result = (matrix *)malloc(sizeof(matrix));
@@ -122,6 +123,7 @@ matrix *Transpose(matrix *A){
     //check whether A is a zero matrix or not
     if(A->array[0].value>0){
         int newCount = 1;
+        //i: find the column index in term array that match the value
         for (int i = 0; i < A->array[0].column_index;i++){
             for (int j = 1; j <= A->array[0].value;j++){
                 if(A->array[j].column_index==i){
@@ -136,19 +138,23 @@ matrix *Transpose(matrix *A){
     return result;
 }
 
+//time complexity: O(column + non-zero count)
 matrix *FastTranspose(matrix *A){
     matrix *result = (matrix *)malloc(sizeof(matrix));
-    int i, j, rowTerms[MAX_SIZE] = {0}, startPos[MAX_SIZE]={1};
+    int i, j, rowSize[MAX_SIZE] = {0}, rowStart[MAX_SIZE]={1};
 
     if(A->array[0].column_index>0){
+        //find how many non-zero terms in the original column of matrix
         for (i = 0; i <= A->array[0].value;i++){
-            rowTerms[A->array[i].column_index]++;
+            rowSize[A->array[i].column_index]++;
         }
+        //using prefix sum to determine the start index of the term array
         for (i = 1; i < A->array[0].column_index;i++){
-            startPos[i] = startPos[i - 1] + rowTerms[i - 1];
+            rowStart[i] = rowStart[i - 1] + rowSize[i - 1];
         }
+        //put the element into term array
         for (i = 0; i <= A->array[0].value;i++){
-            j = startPos[A->array[i].column_index]++;
+            j = rowStart[A->array[i].column_index]++; //update the rowStart to the next index
             result->array[j].row_index = A->array[i].column_index;
             result->array[j].column_index = A->array[i].row_index;
             result->array[j].value = A->array[i].value;
