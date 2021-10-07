@@ -1,7 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#define MAX_SIZE 100000
+
+//non-zero term will not exceed 1E5
+#define MAX_SIZE 100005
 
 typedef struct{
     int column_index;
