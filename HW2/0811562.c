@@ -4,7 +4,7 @@
 #include <stdbool.h>
 
 #define BUFF_LENGTH 15
-#define MAX_SIZE 5
+#define MAX_SIZE 1000005
 //if the queue is empty when dequeuing, return ';'
 #define QUEUE_EMPTY ';'
 
@@ -12,12 +12,12 @@
 int num_processor;
 
 typedef struct queue{
-    char *task;
-    int task_count;
+    char *task; //char array to store tasks
+    int task_count; //# of element in task[]
     int head;
     int tail;
-    char *done;
-    int done_count;
+    char *done; //char array to store the tasks been executed
+    int done_count;  //# of element in done[]
 } queue;
 
 void initQueue(queue *q){
@@ -29,43 +29,50 @@ void initQueue(queue *q){
     q->done_count = 0;
 }
 
+//check whether the queue is empty
 bool queue_empty(queue *q){
     return (q->task_count == 0);
 }
 
+//check whether the queue is full
 bool queue_full(queue *q){
     if((q->head==q->tail+1)||(q->head==0&&q->tail==MAX_SIZE-1))
         return true;
     return false;
 }
 
+//add task into the circular queue
 bool enqueue(queue *q, char c){
     
     if(queue_full(q)){
-        printf("queue is full\n");
+        //printf("Queue is full\n");
         return false;
     }
 
-    //the first element enter the queue
+    //the first element enter the queue, change head from -1 to 0
     if(q->head==-1){
         q->head = 0;
     }
 
+    //put the task into the task[tail]
     q->tail = (q->tail + 1) % MAX_SIZE;
     q->task[q->tail] = c;
     q->task_count++;
     return true;
 }
 
+//first in first out, get the task out of the task array
 char dequeue(queue *q){
     char result;
 
     if(queue_empty(q)){
-        printf("Queue is empty!\n");
+        //printf("Queue is empty!\n");
         return QUEUE_EMPTY;
     }
+    //if the queue isn't empty, return the result of task[head]
     else{
         result = q->task[q->head];
+        //init the head & tail pointer when dequeue the last task in the queue
         if(q->head==q->tail){
             q->head = -1;
             q->tail = -1;
@@ -78,15 +85,18 @@ char dequeue(queue *q){
     return result;
 }
 
+//stack operation, last in first out, get the last task put into the queue
 char pop(queue *q){
     char result;
 
     if(queue_empty(q)){
-        printf("Queue is empty!\n");
+        //printf("Queue is empty!\n");
         return QUEUE_EMPTY;
     }
+    //if the queue isn't empty, return the result of task[tail]
     else{
         result = q->task[q->tail];
+        //init the head & tail pointer when pop the last task in the queue
         if(q->head==q->tail){
             q->head = -1;
             q->tail = -1;
@@ -99,6 +109,7 @@ char pop(queue *q){
     return result;
 }
 
+//printout the queue content
 void printQueue(queue *q){
     if(queue_empty(q)){
         printf("QueueEmpty\n");
@@ -125,6 +136,7 @@ void printQueue(queue *q){
     printf("\n");
 }
 
+//printout the all queue content
 void display(queue *processor){
     printf("-----------------------------------\n");
     for (int i = 1; i <= num_processor;i++){
@@ -138,8 +150,9 @@ void display(queue *processor){
 int main(int argc, char *argv[]){
     
     char *filename = *(argv + 1);
-    char *outputName = *(argv + 2);
+    char *outputname = *(argv + 2);
 
+    //store the input string
     char buffer[BUFF_LENGTH];
     FILE *input = fopen(filename, "r");
 
@@ -151,28 +164,28 @@ int main(int argc, char *argv[]){
     //init all processor:
     for (int i = 1; i <= num_processor;i++){
         initQueue(&processor[i]);
-        printf("%d processor has been init\n", i);
+        //printf("%d processor has been init\n", i);
     }
 
-    
+    //the index to determine to operate on which processor
     int processor_index;
 
     while(fscanf(input, "%s", buffer) != EOF){
         if(strcmp(buffer, "ASSIGN") == 0){
-            printf("%s ", buffer);
+            //printf("%s ", buffer);
             fscanf(input, "%s", buffer);
             processor_index = atoi(buffer);
-            printf("%s ", buffer);
+            //printf("%s ", buffer);
             fscanf(input, "%s", buffer);
-            printf("%s\n", buffer);
+            //printf("%s\n", buffer);
             enqueue(&processor[processor_index], buffer[0]);
-            display(processor);
+            //display(processor);
         }
         else if(strcmp(buffer, "EXEC") == 0){
-            printf("%s ", buffer);
+            //printf("%s ", buffer);
             fscanf(input, "%s", buffer);
             processor_index = atoi(buffer);
-            printf("%s\n", buffer);
+            //printf("%s\n", buffer);
             if(!queue_empty(&processor[processor_index])){
                 //if the queue isn't empty
                 char done_temp = dequeue(&processor[processor_index]);
@@ -191,12 +204,37 @@ int main(int argc, char *argv[]){
                 }
                 processor[processor_index].done[processor[processor_index].done_count++] = pop(&processor[max_processor_index]);
             }
-            display(processor);
+            //display(processor);
         }
         else if(strcmp(buffer, "STOP") == 0){
-            printf("%s\n", buffer);
+            //printf("%s\n", buffer);
             break;
         }
+    }
+
+    //start to output
+    FILE *outputfile;
+    outputfile = fopen(outputname, "w");
+
+    //fprintf the queuing task
+    fprintf(outputfile, "Queuing\n");
+    for (int i = 1; i <= num_processor;i++){
+        fprintf(outputfile, "%d ", i);
+        int j;
+        for (j = processor[i].head; j != processor[i].tail;j=(j+1)%MAX_SIZE){
+            fprintf(outputfile, "%c", processor[i].task[j]);
+        }
+        fprintf(outputfile, "%c\n", processor[i].task[j]);
+    }
+
+    //fprintf the executed task
+    fprintf(outputfile, "Executed\n");
+    for (int i = 1; i <= num_processor;i++){
+        fprintf(outputfile, "%d ", i);
+        for (int j = 0; j < processor[i].done_count;j++){
+            fprintf(outputfile, "%c", processor[i].done[j]);
+        }
+        fprintf(outputfile, "\n");
     }
     return 0;
 }
