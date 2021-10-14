@@ -147,6 +147,13 @@ void display(queue *processor){
     printf("-----------------------------------\n");
 }
 
+void freeProcessor(queue *processor){
+    for (int i = 0; i <= num_processor;i++){
+        free(processor[i].task);
+        free(processor[i].done);
+    }
+}
+
 int main(int argc, char *argv[]){
     
     char *filename = *(argv + 1);
@@ -211,6 +218,7 @@ int main(int argc, char *argv[]){
             break;
         }
     }
+    fclose(input);
 
     //start to output
     FILE *outputfile;
@@ -236,5 +244,7 @@ int main(int argc, char *argv[]){
         }
         fprintf(outputfile, "\n");
     }
+    fclose(outputfile);
+    freeProcessor(processor);
     return 0;
 }
