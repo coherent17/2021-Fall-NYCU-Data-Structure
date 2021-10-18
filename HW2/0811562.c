@@ -23,8 +23,8 @@ typedef struct queue{
 void initQueue(queue *q){
     q->head = -1;
     q->tail = -1;
-    q->task = malloc(sizeof(char) * MAX_SIZE);
-    q->done = malloc(sizeof(char) * MAX_SIZE);
+    q->task = (char *)malloc(sizeof(char) * MAX_SIZE);
+    q->done = (char *)malloc(sizeof(char) * MAX_SIZE);
     q->task_count = 0;
     q->done_count = 0;
 }
