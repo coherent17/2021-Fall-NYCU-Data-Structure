@@ -395,7 +395,6 @@ polynomial *subPolynomial(listnode *head, int a, int b){
     return subResult;
 }
 
-
 polynomial *mulPolynomial(listnode *head, int a, int b){
     polynomial *mulResult = (polynomial *)malloc(sizeof(polynomial));
     initPolynomial(mulResult);
@@ -406,6 +405,7 @@ polynomial *mulPolynomial(listnode *head, int a, int b){
     node *temp_b = poly_b->head;
     node *temp = NULL;
 
+    //do the multiplication term by term
     while(temp_a){
         while(temp_b){
             temp = (node *)malloc(sizeof(node));
@@ -415,25 +415,28 @@ polynomial *mulPolynomial(listnode *head, int a, int b){
             temp->exp_z = temp_a->exp_z + temp_b->exp_z;
             temp->next = NULL;
 
-            //linked up the linkedlist with the pattern
+            //linked up the linkedlist with the pattern:
+
             //first element entry the linkedlist
             if(mulResult->head==NULL){
                 mulResult->head = temp;
                 mulResult->tail = temp;
             }
-            //follow the format to insert the node into proper position
+            //compare with head pointer to determine whether changing head
             else{
                 node *current = mulResult->head;
                 // compare with head;
                 if (temp->exp_x == mulResult->head->exp_x){
                     if(temp->exp_y == mulResult->head->exp_y){
                         if(temp->exp_z == mulResult->head->exp_z){
+                            //term coefficient is all the same
                             mulResult->head->coefficient += temp->coefficient;
                             free(mulResult);
                             temp_b = temp_b->next;
                             continue;
                         }
                         else if(temp->exp_z > mulResult->head->exp_z){
+                            //coefficient is bigger than head, insert before head
                             temp->next = mulResult->head;
                             mulResult->head = temp;
                             temp_b = temp_b->next;
@@ -441,6 +444,7 @@ polynomial *mulPolynomial(listnode *head, int a, int b){
                         }
                     }
                     else if(temp->exp_y > mulResult->head->exp_y){
+                        //coefficient is bigger than head, insert before head
                         temp->next = mulResult->head;
                         mulResult->head = temp;
                         temp_b = temp_b->next;
@@ -448,11 +452,14 @@ polynomial *mulPolynomial(listnode *head, int a, int b){
                     }
                 }
                 else if(temp->exp_x > mulResult->head->exp_x){
+                    //coefficient is bigger than head, insert before head
                     temp->next = mulResult->head;
                     mulResult->head = temp;
                     temp_b = temp_b->next;
                     continue;
                 }
+
+                //check where to insert the node in the linkedlist
                 node *prev = current;
                 current = current->next;
 
@@ -460,6 +467,7 @@ polynomial *mulPolynomial(listnode *head, int a, int b){
                     if(temp->exp_x==current->exp_x){
                         if(temp->exp_y==current->exp_y){
                             if(temp->exp_z==current->exp_z){
+                                //same term
                                 current->coefficient += temp->coefficient;
                                 free(temp);
                                 break;
@@ -485,8 +493,10 @@ polynomial *mulPolynomial(listnode *head, int a, int b){
                     current = current->next;
                     prev = prev->next;
                 }
+                //if traverse through the tail of the linkedlist, link on the tail
                 if(current==NULL){
                     prev->next = temp;
+                    mulResult->tail = temp;
                 }
             }
             temp_b = temp_b->next;
