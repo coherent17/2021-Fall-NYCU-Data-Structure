@@ -129,12 +129,373 @@ polynomial *addPolynomial(listnode *head, int a, int b){
     //find a_th polynomial and b_th polynomial
     polynomial *poly_a = findPolynomial(head, a);
     polynomial *poly_b = findPolynomial(head, b);
+    node *temp_a = poly_a->head;
+    node *temp_b = poly_b->head;
+    node *temp = NULL;
+    while(temp_a && temp_b){
+        if(temp_a->exp_x == temp_b->exp_x){
+            if(temp_a->exp_y == temp_b->exp_y){
+                if(temp_a->exp_z == temp_b->exp_z){
+                    if(temp_a->coefficient + temp_b->coefficient!=0){
+                        temp = (node *)malloc(sizeof(node));
+                        temp->coefficient = temp_a->coefficient + temp_b->coefficient;
+                        temp->exp_x = temp_a->exp_x;
+                        temp->exp_y = temp_a->exp_y;
+                        temp->exp_z = temp_a->exp_z;
+                        temp->next = NULL;
+                        temp_a = temp_a->next;
+                        temp_b = temp_b->next;
+                    }
+                    else{
+                        temp_a = temp_a->next;
+                        temp_b = temp_b->next;
+                    }
+                }
+                else if(temp_a->exp_z > temp_b->exp_z){
+                    temp = (node *)malloc(sizeof(node));
+                    temp->coefficient = temp_a->coefficient;
+                    temp->exp_x = temp_a->exp_x;
+                    temp->exp_y = temp_a->exp_y;
+                    temp->exp_z = temp_a->exp_z;
+                    temp->next = NULL;
+                    temp_a = temp_a->next;
+                }
+                else if(temp_a->exp_z < temp_b->exp_z){
+                    temp = (node *)malloc(sizeof(node));
+                    temp->coefficient = temp_b->coefficient;
+                    temp->exp_x = temp_b->exp_x;
+                    temp->exp_y = temp_b->exp_y;
+                    temp->exp_z = temp_b->exp_z;
+                    temp->next = NULL;
+                    temp_b = temp_b->next;
+                }
+            }
+            else if(temp_a->exp_y > temp_b->exp_y){
+                temp = (node *)malloc(sizeof(node));
+                temp->coefficient = temp_a->coefficient;
+                temp->exp_x = temp_a->exp_x;
+                temp->exp_y = temp_a->exp_y;
+                temp->exp_z = temp_a->exp_z;
+                temp->next = NULL;
+                temp_a = temp_a->next;
+            }
+            else if(temp_a->exp_y < temp_b->exp_y){
+                temp = (node *)malloc(sizeof(node));
+                temp->coefficient = temp_b->coefficient;
+                temp->exp_x = temp_b->exp_x;
+                temp->exp_y = temp_b->exp_y;
+                temp->exp_z = temp_b->exp_z;
+                temp->next = NULL;
+                temp_b = temp_b->next;
+            }
+        }
+        else if(temp_a->exp_x > temp_b->exp_x){
+            temp = (node *)malloc(sizeof(node));
+            temp->coefficient = temp_a->coefficient;
+            temp->exp_x = temp_a->exp_x;
+            temp->exp_y = temp_a->exp_y;
+            temp->exp_z = temp_a->exp_z;
+            temp->next = NULL;
+            temp_a = temp_a->next;
+        }
+        else if(temp_a->exp_x < temp_b->exp_x){
+            temp = (node *)malloc(sizeof(node));
+            temp->coefficient = temp_b->coefficient;
+            temp->exp_x = temp_b->exp_x;
+            temp->exp_y = temp_b->exp_y;
+            temp->exp_z = temp_b->exp_z;
+            temp->next = NULL;
+            temp_b = temp_b->next;
+        }
+
+        if(addResult->head==NULL){
+            addResult->head = temp;
+            addResult->tail = temp;
+        }
+        else{
+            addResult->tail->next = temp;
+            addResult->tail = temp;
+        }
+    }
+    if(temp_a == NULL){
+        while(temp_b){
+            temp = (node *)malloc(sizeof(node));
+            temp->coefficient = temp_b->coefficient;
+            temp->exp_x = temp_b->exp_x;
+            temp->exp_y = temp_b->exp_y;
+            temp->exp_z = temp_b->exp_z;
+            temp->next = NULL;
+            temp_b = temp_b->next;
+            if(addResult->head==NULL){
+                addResult->head = temp;
+                addResult->tail = temp;
+            }
+            else{
+                addResult->tail->next = temp;
+                addResult->tail = temp;
+            }
+        }
+    }
+
+    if(temp_b == NULL){
+        while(temp_a){
+            temp = (node *)malloc(sizeof(node));
+            temp->coefficient = temp_a->coefficient;
+            temp->exp_x = temp_a->exp_x;
+            temp->exp_y = temp_a->exp_y;
+            temp->exp_z = temp_a->exp_z;
+            temp->next = NULL;
+            temp_a = temp_a->next;
+            if(addResult->head==NULL){
+                addResult->head = temp;
+                addResult->tail = temp;
+            }
+            else{
+                addResult->tail->next = temp;
+                addResult->tail = temp;
+            }
+        }
+    }
     return addResult;
 }
 
-void delete_node(node **headptr){
+polynomial *subPolynomial(listnode *head, int a, int b){
+    polynomial *subResult = (polynomial *)malloc(sizeof(polynomial));
+    initPolynomial(subResult);
+    //find a_th polynomial and b_th polynomial
+    polynomial *poly_a = findPolynomial(head, a);
+    polynomial *poly_b = findPolynomial(head, b);
+    node *temp_a = poly_a->head;
+    node *temp_b = poly_b->head;
+    node *temp = NULL;
+    while(temp_a && temp_b){
+        if(temp_a->exp_x == temp_b->exp_x){
+            if(temp_a->exp_y == temp_b->exp_y){
+                if(temp_a->exp_z == temp_b->exp_z){
+                    if(temp_a->coefficient - temp_b->coefficient!=0){
+                        temp = (node *)malloc(sizeof(node));
+                        temp->coefficient = temp_a->coefficient - temp_b->coefficient;
+                        temp->exp_x = temp_a->exp_x;
+                        temp->exp_y = temp_a->exp_y;
+                        temp->exp_z = temp_a->exp_z;
+                        temp->next = NULL;
+                        temp_a = temp_a->next;
+                        temp_b = temp_b->next;
+                    }
+                    else{
+                        temp_a = temp_a->next;
+                        temp_b = temp_b->next;
+                    }
+                }
+                else if(temp_a->exp_z > temp_b->exp_z){
+                    temp = (node *)malloc(sizeof(node));
+                    temp->coefficient = temp_a->coefficient;
+                    temp->exp_x = temp_a->exp_x;
+                    temp->exp_y = temp_a->exp_y;
+                    temp->exp_z = temp_a->exp_z;
+                    temp->next = NULL;
+                    temp_a = temp_a->next;
+                }
+                else if(temp_a->exp_z < temp_b->exp_z){
+                    temp = (node *)malloc(sizeof(node));
+                    temp->coefficient = (-1) * temp_b->coefficient;
+                    temp->exp_x = temp_b->exp_x;
+                    temp->exp_y = temp_b->exp_y;
+                    temp->exp_z = temp_b->exp_z;
+                    temp->next = NULL;
+                    temp_b = temp_b->next;
+                }
+            }
+            else if(temp_a->exp_y > temp_b->exp_y){
+                temp = (node *)malloc(sizeof(node));
+                temp->coefficient = temp_a->coefficient;
+                temp->exp_x = temp_a->exp_x;
+                temp->exp_y = temp_a->exp_y;
+                temp->exp_z = temp_a->exp_z;
+                temp->next = NULL;
+                temp_a = temp_a->next;
+            }
+            else if(temp_a->exp_y < temp_b->exp_y){
+                temp = (node *)malloc(sizeof(node));
+                temp->coefficient = (-1) * temp_b->coefficient;
+                temp->exp_x = temp_b->exp_x;
+                temp->exp_y = temp_b->exp_y;
+                temp->exp_z = temp_b->exp_z;
+                temp->next = NULL;
+                temp_b = temp_b->next;
+            }
+        }
+        else if(temp_a->exp_x > temp_b->exp_x){
+            temp = (node *)malloc(sizeof(node));
+            temp->coefficient = temp_a->coefficient;
+            temp->exp_x = temp_a->exp_x;
+            temp->exp_y = temp_a->exp_y;
+            temp->exp_z = temp_a->exp_z;
+            temp->next = NULL;
+            temp_a = temp_a->next;
+        }
+        else if(temp_a->exp_x < temp_b->exp_x){
+            temp = (node *)malloc(sizeof(node));
+            temp->coefficient = (-1) * temp_b->coefficient;
+            temp->exp_x = temp_b->exp_x;
+            temp->exp_y = temp_b->exp_y;
+            temp->exp_z = temp_b->exp_z;
+            temp->next = NULL;
+            temp_b = temp_b->next;
+        }
 
+        if(subResult->head==NULL){
+            subResult->head = temp;
+            subResult->tail = temp;
+        }
+        else{
+            subResult->tail->next = temp;
+            subResult->tail = temp;
+        }
+    }
+    if(temp_a == NULL){
+        while(temp_b){
+            temp = (node *)malloc(sizeof(node));
+            temp->coefficient = (-1) * temp_b->coefficient;
+            temp->exp_x = temp_b->exp_x;
+            temp->exp_y = temp_b->exp_y;
+            temp->exp_z = temp_b->exp_z;
+            temp->next = NULL;
+            temp_b = temp_b->next;
+            if(subResult->head==NULL){
+                subResult->head = temp;
+                subResult->tail = temp;
+            }
+            else{
+                subResult->tail->next = temp;
+                subResult->tail = temp;
+            }
+        }
+    }
+
+    if(temp_b == NULL){
+        while(temp_a){
+            temp = (node *)malloc(sizeof(node));
+            temp->coefficient = temp_a->coefficient;
+            temp->exp_x = temp_a->exp_x;
+            temp->exp_y = temp_a->exp_y;
+            temp->exp_z = temp_a->exp_z;
+            temp->next = NULL;
+            temp_a = temp_a->next;
+            if(subResult->head==NULL){
+                subResult->head = temp;
+                subResult->tail = temp;
+            }
+            else{
+                subResult->tail->next = temp;
+                subResult->tail = temp;
+            }
+        }
+    }
+    return subResult;
 }
+
+
+polynomial *mulPolynomial(listnode *head, int a, int b){
+    polynomial *mulResult = (polynomial *)malloc(sizeof(polynomial));
+    initPolynomial(mulResult);
+    //find a_th polynomial and b_th polynomial
+    polynomial *poly_a = findPolynomial(head, a);
+    polynomial *poly_b = findPolynomial(head, b);
+    node *temp_a = poly_a->head;
+    node *temp_b = poly_b->head;
+    node *temp = NULL;
+
+    while(temp_a){
+        while(temp_b){
+            temp = (node *)malloc(sizeof(node));
+            temp->coefficient = temp_a->coefficient * temp_b->coefficient;
+            temp->exp_x = temp_a->exp_x + temp_b->exp_x;
+            temp->exp_y = temp_a->exp_y + temp_b->exp_y;
+            temp->exp_z = temp_a->exp_z + temp_b->exp_z;
+            temp->next = NULL;
+
+            //linked up the linkedlist with the pattern
+            //first element entry the linkedlist
+            if(mulResult->head==NULL){
+                mulResult->head = temp;
+                mulResult->tail = temp;
+            }
+            //follow the format to insert the node into proper position
+            else{
+                node *current = mulResult->head;
+                // compare with head;
+                if (temp->exp_x == mulResult->head->exp_x){
+                    if(temp->exp_y == mulResult->head->exp_y){
+                        if(temp->exp_z == mulResult->head->exp_z){
+                            mulResult->head->coefficient += temp->coefficient;
+                            free(mulResult);
+                            temp_b = temp_b->next;
+                            continue;
+                        }
+                        else if(temp->exp_z > mulResult->head->exp_z){
+                            temp->next = mulResult->head;
+                            mulResult->head = temp;
+                            temp_b = temp_b->next;
+                            continue;
+                        }
+                    }
+                    else if(temp->exp_y > mulResult->head->exp_y){
+                        temp->next = mulResult->head;
+                        mulResult->head = temp;
+                        temp_b = temp_b->next;
+                        continue;
+                    }
+                }
+                else if(temp->exp_x > mulResult->head->exp_x){
+                    temp->next = mulResult->head;
+                    mulResult->head = temp;
+                    temp_b = temp_b->next;
+                    continue;
+                }
+                node *prev = current;
+                current = current->next;
+
+                while (current != NULL){
+                    if(temp->exp_x==current->exp_x){
+                        if(temp->exp_y==current->exp_y){
+                            if(temp->exp_z==current->exp_z){
+                                current->coefficient += temp->coefficient;
+                                free(temp);
+                                break;
+
+                            }
+                            else if(temp->exp_z > current->exp_z){
+                                temp->next = current;
+                                prev->next = temp;
+                                break;
+                            }
+                        }
+                        else if(temp->exp_y > current->exp_y){
+                            temp->next = current;
+                            prev->next = temp;
+                            break;
+                        }
+                    }
+                    else if(temp->exp_x > current->exp_x){
+                        temp->next = current;
+                        prev->next = temp;
+                        break;
+                    }
+                    current = current->next;
+                    prev = prev->next;
+                }
+                if(current==NULL){
+                    prev->next = temp;
+                }
+            }
+            temp_b = temp_b->next;
+        }
+        temp_a = temp_a->next;
+    }
+    return mulResult;
+}
+
 
 //go through the entire polynomial and delete all nodes
 void delete_all_node(polynomial *p){
@@ -176,6 +537,8 @@ void deletePolynomial(listnode **headptr, listnode **tailptr, int num_to_delete)
     listnode *prev = temp;
     temp = temp->next;
     prev->next = temp->next;
+
+    //if delete node is the last node in the linkedlist
     if(temp->next==NULL){
         (*tailptr) = prev;
     }
@@ -184,6 +547,13 @@ void deletePolynomial(listnode **headptr, listnode **tailptr, int num_to_delete)
     }
     delete_all_node(temp->p);
     free(temp);
+}
+
+void deleteList(polylist *list){
+    while(list->listhead!=NULL){
+        deletePolynomial(&list->listhead, &list->listtail, 0);
+    }
+    free(list);
 }
 
 int main(int argc, char *argv[]){
@@ -230,14 +600,44 @@ int main(int argc, char *argv[]){
                 list->listtail->next = temp;
                 list->listtail = temp;
             }
-            printf("\nAfter addding:\n");
+            printf("\nAfter adding:\n");
             printPolyList(list);
         }
         else if(OP_ID==2){
             //subtract polynomial here
+            int a, b;
+            fscanf(input, "%d", &a);
+            fscanf(input, "%d", &b);
+            polynomial *subResult = subPolynomial(list->listhead, a, b);
+            listnode *temp = createListNode(subResult);
+            if(list->listhead==NULL){
+                list->listhead = temp;
+                list->listtail = temp;
+            }
+            else{
+                list->listtail->next = temp;
+                list->listtail = temp;
+            }
+            printf("\nAfter substracting:\n");
+            printPolyList(list);
         }
         else if(OP_ID==3){
             //multiply polynomial here
+            int a, b;
+            fscanf(input, "%d", &a);
+            fscanf(input, "%d", &b);
+            polynomial *mulResult = mulPolynomial(list->listhead, a, b);
+            listnode *temp = createListNode(mulResult);
+            if(list->listhead==NULL){
+                list->listhead = temp;
+                list->listtail = temp;
+            }
+            else{
+                list->listtail->next = temp;
+                list->listtail = temp;
+            }
+            printf("\nAfter multipling:\n");
+            printPolyList(list);
         }
         else if(OP_ID==4){
             //delete polynomial here
@@ -250,5 +650,7 @@ int main(int argc, char *argv[]){
     }
     printf("\nFinal:\n");
     printPolyList(list);
+    deleteList(list);
+    fclose(input);
     return 0;
 }
