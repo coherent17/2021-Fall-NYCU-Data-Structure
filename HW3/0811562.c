@@ -56,7 +56,7 @@ listnode *createListNode(polynomial *p){
     return newListNode;
 }
 
-polynomial *append_poly(FILE *input){
+polynomial *appendPolynomial(FILE *input){
     //start of the polynomial
     polynomial *p = (polynomial *)malloc(sizeof(polynomial));
     initPolynomial(p);
@@ -91,6 +91,48 @@ polynomial *append_poly(FILE *input){
     return p;
 }
 
+void delete_node(node **headptr){
+
+}
+
+//go through the entire polynomial and delete all nodes
+void delete_all_node(polynomial *p){
+    node **head = &p->head;
+    node **tail = &p->tail;
+    node *cur_del_node = (*head);
+    node *next_node;
+    while(cur_del_node!=NULL){
+        next_node = cur_del_node->next;
+        free(cur_del_node);
+        cur_del_node = next_node;
+    }
+    (*head) = NULL;
+    (*tail) = NULL;
+}
+
+void deletePolynomial(listnode **headptr, int num_to_delete){
+
+    listnode *temp = *(headptr);
+    //if the delete node is the head node:
+    if(num_to_delete==0 && (*headptr)!=NULL){
+        (*headptr) = temp->next;
+        //go through the entire polynomial and delete all node:
+        delete_all_node(temp->p);
+        free(temp);
+        return;
+    }
+
+    //find which polynomial to delete:
+    for (int i = 0; i < num_to_delete-1;i++){
+        temp = temp->next;
+    }
+    listnode *prev = temp;
+    temp = temp->next;
+    prev->next = temp->next;
+    delete_all_node(temp->p);
+    free(temp);
+}
+
 void printPolynomial(polynomial *p){
     node *temp = p->head;
     while(temp!=NULL){
@@ -106,6 +148,8 @@ void printPolynomial(polynomial *p){
 void printPolyList(polylist *list){
     int count = 0;
     listnode *temp = list->listhead;
+    if(temp==NULL)
+        printf("There is no polynomial in the polylist\n");
     while(temp!=NULL){
         printf("Number %d polynomial:\n", count++);
         printPolynomial(temp->p);
@@ -129,7 +173,7 @@ int main(int argc, char *argv[]){
     while(fscanf(input, "%d", &OP_ID)!=EOF){
         //append the polynomial
         if(OP_ID==0){
-            polynomial *p = append_poly(input);
+            polynomial *p = appendPolynomial(input);
             listnode *temp = createListNode(p);
             if(list->listhead==NULL){
                 list->listhead = temp;
@@ -139,7 +183,8 @@ int main(int argc, char *argv[]){
                 list->listtail->next = temp;
                 list->listtail = temp;
             }
-            //printPolyList(list);
+            printf("\nAfter appending:\n");
+            printPolyList(list);
         }
         else if(OP_ID==1){
             //add polynomial here
@@ -152,8 +197,14 @@ int main(int argc, char *argv[]){
         }
         else if(OP_ID==4){
             //delete polynomial here
+            int del_index;
+            fscanf(input, "%d", &del_index);
+            deletePolynomial(&list->listhead, del_index);
+            printf("\nAfter deleting:\n");
+            printPolyList(list);
         }
     }
+    printf("\nFinal:\n");
     printPolyList(list);
     return 0;
 }
