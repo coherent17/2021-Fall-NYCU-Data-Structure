@@ -16,4 +16,4 @@ see:
 	cat sample.out
 
 clean:
-	rm 0811562 out* sample.out
+	rm 0811562  sample.out
