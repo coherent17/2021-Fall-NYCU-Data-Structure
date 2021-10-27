@@ -14,6 +14,7 @@ typedef struct node{
 typedef struct polynomial{
     node *head;
     node *tail;
+    int count;
 } polynomial;
 
 // store the head and tail pointer for each polynomials
@@ -31,6 +32,7 @@ typedef struct polylist{
 void initPolynomial(polynomial *p){
     p->head = NULL;
     p->tail = NULL;
+    p->count = 0;
 }
 
 void printPolynomial(polynomial *p){
@@ -53,7 +55,7 @@ void printPolyList(listnode *head){
         return;
     }
     while(temp!=NULL){
-        printf("Number %d polynomial:\n", count++);
+        printf("Number %d polynomial, there are %d nodes in the polynomial\n", count++, temp->polynomial->count);
         printPolynomial(temp->polynomial);
         temp = temp->next;
     }
@@ -88,6 +90,7 @@ polynomial *appendPolynomial(FILE *input){
 
     //scanf how many term to create
     fscanf(input, "%d", &term_count);
+    p->count = term_count;
     for (int i = 0; i < term_count;i++){
         fscanf(input, "%d", &coefficient);
         fscanf(input, "%d", &exp_x);
@@ -102,7 +105,7 @@ polynomial *appendPolynomial(FILE *input){
             p->tail = temp;
         }
 
-        //<case 2>: head node exise -> insert at the tail, and update tail
+        //<case 2>: head node exist -> insert at the tail, and update tail
         else{
             p->tail->next = temp;
             p->tail = temp;
@@ -119,6 +122,7 @@ polynomial *findPolynomial(listnode *head, int index){
     return temp->polynomial;
 }
 
+/*
 polynomial *insertNode(polynomial *p, node *node_to_insert){
     node **head = &(p->head);
     node **tail = &(p->tail);
@@ -135,10 +139,12 @@ polynomial *insertNode(polynomial *p, node *node_to_insert){
         if(temp->exp_x == node_to_insert->exp_x){
             if(temp->exp_y == node_to_insert->exp_y){
                 if(temp->exp_z == node_to_insert->exp_z){
-                    
+                    temp->coefficient += node_to_insert->coefficient;
+                    free(node_to_insert);
+                    break;
                 }
                 else if(temp->exp_z > node_to_insert->exp_z){
-
+                    temp = temp->next;
                 }
                 else if(temp->exp_z < node_to_insert->exp_z){
 
@@ -160,6 +166,7 @@ polynomial *insertNode(polynomial *p, node *node_to_insert){
     }
     return p;
 }
+*/
 
 polynomial *addPolynomial(listnode *head, int a, int b){
     polynomial *result = (polynomial *)malloc(sizeof(polynomial));
@@ -177,9 +184,14 @@ polynomial *addPolynomial(listnode *head, int a, int b){
                 if(temp_a->exp_z == temp_b->exp_z){
                     if((temp_a->coefficient + temp_b->coefficient)!=0){
                         newnode = createNode(temp_a->coefficient + temp_b->coefficient, temp_a->exp_x, temp_a->exp_y, temp_a->exp_z);
+                        temp_a = temp_a->next;
+                        temp_b = temp_b->next;
                     }
-                    temp_a = temp_a->next;
-                    temp_b = temp_b->next;
+                    else{
+                        temp_a = temp_a->next;
+                        temp_b = temp_b->next;
+                        continue;
+                    }
                 }
                 else if(temp_a->exp_z > temp_b->exp_z){
                     newnode = createNode(temp_a->coefficient, temp_a->exp_x, temp_a->exp_y, temp_a->exp_z);
@@ -208,7 +220,16 @@ polynomial *addPolynomial(listnode *head, int a, int b){
             temp_b = temp_b->next;
         }
         //insert the node into the list through the rule
-        result = insertNode(result, newnode);
+        if(result->head == NULL){
+            result->count += 1;
+            result->head = newnode;
+            result->tail = newnode;
+        }
+        else{
+            result->count += 1;
+            result->tail->next = newnode;
+            result->tail = newnode;
+        }
     }
 
     //if traverse all of the node in linkedlist a, insert remaining b node
@@ -216,7 +237,18 @@ polynomial *addPolynomial(listnode *head, int a, int b){
         while(temp_b){
             newnode = createNode(temp_b->coefficient, temp_b->exp_x, temp_b->exp_y, temp_b->exp_z);
             temp_b = temp_b->next;
-            result = insertNode(result, newnode);
+
+            //insert the node into the list through the rule
+            if(result->head == NULL){
+                result->count += 1;
+                result->head = newnode;
+                result->tail = newnode;
+            }
+            else{
+                result->count += 1;
+                result->tail->next = newnode;
+                result->tail = newnode;
+            }
         }
     }
 
@@ -225,8 +257,290 @@ polynomial *addPolynomial(listnode *head, int a, int b){
         while(temp_a){
             newnode = createNode(temp_a->coefficient, temp_a->exp_x, temp_a->exp_y, temp_a->exp_z);
             temp_a = temp_a->next;
-            result = insertNode(result, newnode);
+
+            //insert the node into the list through the rule
+            if(result->head == NULL){
+                result->count += 1;
+                result->head = newnode;
+                result->tail = newnode;
+            }
+            else{
+                result->count += 1;
+                result->tail->next = newnode;
+                result->tail = newnode;
+            }
         }
+    }
+    //if the result is the zero polynomial, add a zero term:
+    if(result->head == NULL){
+        result->count += 1;
+        newnode = createNode(0, 0, 0, 0);
+        result->head = newnode;
+        result->tail = newnode;
+    }
+    //remove the duplicate zero term:
+    else if(result->head != NULL && result->tail->coefficient == 0){
+        result->count--;
+        node *temp = result->head;
+        while(temp->next!=result->tail){
+            temp = temp->next;
+        }
+        free(temp->next);
+        result->tail = temp;
+        result->tail->next = NULL;
+    }
+    return result;
+}
+
+polynomial *subPolynomial(listnode *head, int a, int b){
+    polynomial *result = (polynomial *)malloc(sizeof(polynomial));
+    initPolynomial(result);
+    //find a_th polynomial and b_th polynomial
+    polynomial *poly_a = findPolynomial(head, a);
+    polynomial *poly_b = findPolynomial(head, b);
+    node *temp_a = poly_a->head;
+    node *temp_b = poly_b->head;
+    node *newnode = NULL;
+
+    while(temp_a != NULL && temp_b != NULL){
+        if(temp_a->exp_x == temp_b->exp_x){
+            if(temp_a->exp_y == temp_b->exp_y){
+                if(temp_a->exp_z == temp_b->exp_z){
+                    if((temp_a->coefficient - temp_b->coefficient)!=0){
+                        newnode = createNode(temp_a->coefficient - temp_b->coefficient, temp_a->exp_x, temp_a->exp_y, temp_a->exp_z);
+                        temp_a = temp_a->next;
+                        temp_b = temp_b->next;
+                    }
+                    else{
+                        temp_a = temp_a->next;
+                        temp_b = temp_b->next;
+                        continue;
+                    }
+                }
+                else if(temp_a->exp_z > temp_b->exp_z){
+                    newnode = createNode(temp_a->coefficient, temp_a->exp_x, temp_a->exp_y, temp_a->exp_z);
+                    temp_a = temp_a->next;
+                }
+                else if(temp_a->exp_z < temp_b->exp_z){
+                    newnode = createNode((-1) *temp_b->coefficient, temp_b->exp_x, temp_b->exp_y, temp_b->exp_z);
+                    temp_b = temp_b->next;
+                }
+            }
+            else if(temp_a->exp_y > temp_b->exp_y){
+                newnode = createNode(temp_a->coefficient, temp_a->exp_x, temp_a->exp_y, temp_a->exp_z);
+                temp_a = temp_a->next;
+            }
+            else if(temp_a->exp_y < temp_b->exp_y){
+                newnode = createNode((-1) *temp_b->coefficient, temp_b->exp_x, temp_b->exp_y, temp_b->exp_z);
+                temp_b = temp_b->next;
+            }
+        }
+        else if(temp_a->exp_x > temp_b->exp_x){
+            newnode = createNode(temp_a->coefficient, temp_a->exp_x, temp_a->exp_y, temp_a->exp_z);
+            temp_a = temp_a->next;
+        }
+        else if(temp_a->exp_x < temp_b->exp_x){
+            newnode = createNode((-1) * temp_b->coefficient, temp_b->exp_x, temp_b->exp_y, temp_b->exp_z);
+            temp_b = temp_b->next;
+        }
+        //insert the node into the list through the rule
+        if(result->head == NULL){
+            result->count += 1;
+            result->head = newnode;
+            result->tail = newnode;
+        }
+        else{
+            result->count += 1;
+            result->tail->next = newnode;
+            result->tail = newnode;
+        }
+    }
+
+    //if traverse all of the node in linkedlist a, insert remaining b node
+    if(temp_a == NULL){
+        while(temp_b){
+            newnode = createNode((-1) * temp_b->coefficient, temp_b->exp_x, temp_b->exp_y, temp_b->exp_z);
+            temp_b = temp_b->next;
+
+            //insert the node into the list through the rule
+            if(result->head == NULL){
+                result->count += 1;
+                result->head = newnode;
+                result->tail = newnode;
+            }
+            else{
+                result->count += 1;
+                result->tail->next = newnode;
+                result->tail = newnode;
+            }
+        }
+    }
+
+    //if traverse all of the node in linkedlist b, insert remaining a node
+    if(temp_b == NULL){
+        while(temp_a){
+            newnode = createNode(temp_a->coefficient, temp_a->exp_x, temp_a->exp_y, temp_a->exp_z);
+            temp_a = temp_a->next;
+
+            //insert the node into the list through the rule
+            if(result->head == NULL){
+                result->count += 1;
+                result->head = newnode;
+                result->tail = newnode;
+            }
+            else{
+                result->count += 1;
+                result->tail->next = newnode;
+                result->tail = newnode;
+            }
+        }
+    }
+    //if the result is the zero polynomial, add a zero term:
+    if(result->head == NULL){
+        result->count += 1;
+        newnode = createNode(0, 0, 0, 0);
+        result->head = newnode;
+        result->tail = newnode;
+    }
+    //remove the duplicate zero term:
+    else if(result->head != NULL && result->tail->coefficient == 0){
+        result->count--;
+        node *temp = result->head;
+        while(temp->next!=result->tail){
+            temp = temp->next;
+        }
+        free(temp->next);
+        result->tail = temp;
+        result->tail->next = NULL;
+    }
+    return result;
+}
+
+polynomial *mulPolynomial(listnode *head, int a, int b){
+    polynomial *result = (polynomial *)malloc(sizeof(polynomial));
+    initPolynomial(result);
+    //find a_th polynomial and b_th polynomial
+    polynomial *poly_a = findPolynomial(head, a);
+    polynomial *poly_b = findPolynomial(head, b);
+    node *temp_a = poly_a->head;
+    node *temp_b = poly_b->head;
+
+    //check whether a or b is the zero polynomial:
+    if(temp_a->coefficient == 0 || temp_b->coefficient ==0){
+        result->count += 1;
+        node *newnode = createNode(0, 0, 0, 0);
+        result->head = newnode;
+        result->tail = newnode;
+        return result;
+    }
+
+
+    //do the multiplication term by term
+    while(temp_a){
+        while(temp_b){
+            node *newnode = createNode(temp_a->coefficient * temp_b->coefficient, temp_a->exp_x + temp_b->exp_x, temp_a->exp_y + temp_b->exp_y, temp_a->exp_z + temp_b->exp_z);
+
+            //linked up the linkedlist with the pattern:
+
+            //first element entry the linkedlist
+            if(result->head == NULL){
+                result->head = newnode;
+                result->tail = newnode;
+            }
+
+            //compare with head pointer to determine whether changing head
+            else{
+                //compare with head
+                if(newnode->exp_x == result->head->exp_x){
+                    if(newnode->exp_y == result->head->exp_y){
+                        if(newnode->exp_z == result->head->exp_z){
+                            //term coeffieicnt is all the same
+                            result->head->coefficient += newnode->coefficient;
+                            free(newnode);
+                            temp_b = temp_b->next;
+                            continue;
+                        }
+                        else if(newnode->exp_z > result->head->exp_z){
+                            //coeffieint is bigger than head, insert before head
+                            newnode->next = result->head;
+                            result->head = newnode;
+                            temp_b = temp_b->next;
+                            continue;
+                        }
+                        else if(newnode->exp_z < result->head->exp_z){
+                            //insert after head somewhere
+                        }
+                    }
+                    else if(newnode->exp_y > result->head->exp_y){
+                        newnode->next = result->head;
+                        result->head = newnode;
+                        temp_b = temp_b->next;
+                        continue;
+                    }
+                    else if(newnode->exp_y < result->head->exp_y){
+                        //insert after head somewhere
+                    }
+                }
+                else if(newnode->exp_x > result->head->exp_x){
+                    newnode->next = result->head;
+                    result->head = newnode;
+                    temp_b = temp_b->next;
+                    continue;
+                }
+                else if(newnode->exp_x < result->head->exp_x){
+                    //insert after head somewhere
+                }
+            }
+            //check where to insert the node in the linkedlist
+            node *current = result->head->next;
+            node *prev = result->head;
+
+            while(current != NULL){
+                if(newnode->exp_x == current->exp_x){
+                    if(newnode->exp_y == current->exp_y){
+                        if(newnode->exp_z == current->exp_z){
+                            //same term:
+                            current->coefficient += newnode->coefficient;
+                            free(newnode);
+                            break;
+                        }
+                        else if(newnode->exp_z > current->exp_z){
+                            newnode->next = current;
+                            prev->next = newnode;
+                            break;
+                        }
+                        else if(newnode->exp_z < current->exp_z){
+                            //keep finding where to insert
+                        }
+                    }
+                    else if(newnode->exp_y > current->exp_y){
+                        newnode->next = current;
+                        prev->next = newnode;
+                        break;
+                    }
+                    else if(newnode->exp_y < current->exp_y){
+                        //keep finding where to insert
+                    }
+                }
+                else if(newnode->exp_x > current->exp_x){
+                    newnode->next = current;
+                    prev->next = newnode;
+                    break;
+                }
+                else if(newnode->exp_x < current->exp_x){
+                    //keep finding where to insert
+                }
+                current = current->next;
+                prev = prev->next;
+            }
+            // if traverse the all linkedlist, link on the tail
+            if(current == NULL){
+                prev->next = newnode;
+                result->tail = newnode;
+            }
+            temp_b = temp_b->next;
+        }
+        temp_a = temp_a->next;
     }
     return result;
 }
@@ -339,11 +653,23 @@ int main(int argc, char *argv[]){
         }
         //substract polynomial
         else if(OP_ID == 2){
-
+            int a, b;
+            fscanf(input, "%d", &a);
+            fscanf(input, "%d", &b);
+            polynomial *p = subPolynomial(list.head, a, b);
+            appendList(&list.head, &list.tail, p);
+            printf("\nAfter substracting:\n");
+            printPolyList(list.head);
         }
         //multiply polynomial
         else if(OP_ID == 3){
-
+            int a, b;
+            fscanf(input, "%d", &a);
+            fscanf(input, "%d", &b);
+            polynomial *p = mulPolynomial(list.head, a, b);
+            appendList(&list.head, &list.tail, p);
+            printf("\nAfter multipling:\n");
+            printPolyList(list.head);
         }
         //delete polynomial
         else if(OP_ID == 4){
