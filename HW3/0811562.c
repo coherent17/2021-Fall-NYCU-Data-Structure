@@ -122,52 +122,6 @@ polynomial *findPolynomial(listnode *head, int index){
     return temp->polynomial;
 }
 
-/*
-polynomial *insertNode(polynomial *p, node *node_to_insert){
-    node **head = &(p->head);
-    node **tail = &(p->tail);
-    //add the first element into the linkedlist
-    if(*head == NULL){
-        *head = node_to_insert;
-        *tail = node_to_insert;
-        return p;
-    }
-
-    //find the location to insert the node
-    node *temp = *head;
-    while(temp != NULL){
-        if(temp->exp_x == node_to_insert->exp_x){
-            if(temp->exp_y == node_to_insert->exp_y){
-                if(temp->exp_z == node_to_insert->exp_z){
-                    temp->coefficient += node_to_insert->coefficient;
-                    free(node_to_insert);
-                    break;
-                }
-                else if(temp->exp_z > node_to_insert->exp_z){
-                    temp = temp->next;
-                }
-                else if(temp->exp_z < node_to_insert->exp_z){
-
-                }
-            }
-            else if(temp->exp_y > node_to_insert->exp_y){
-
-            }
-            else if(temp->exp_y < node_to_insert->exp_y){
-
-            }
-        }
-        else if(temp->exp_x > node_to_insert->exp_x){
-
-        }
-        else if(temp->exp_x < node_to_insert->exp_x){
-
-        }
-    }
-    return p;
-}
-*/
-
 polynomial *addPolynomial(listnode *head, int a, int b){
     polynomial *result = (polynomial *)malloc(sizeof(polynomial));
     initPolynomial(result);
