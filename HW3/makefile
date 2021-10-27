@@ -3,7 +3,7 @@ CFLAGS = -g -Wall
 CHECKCC = valgrind
 CHECKFLAGS = --leak-check=full -s
 
-0811562: bug_fix.c
+0811562: 0811562.c
 	$(CC) $(CFLAGS) $< -o $@
 
 do:
