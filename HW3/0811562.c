@@ -602,8 +602,8 @@ int main(int argc, char *argv[]){
         if(OP_ID == 0){
             polynomial *p = appendPolynomial(input);
             appendList(&list.head, &list.tail, p);
-            printf("\nAfter appending:\n");
-            printPolyList(list.head);
+            //printf("\nAfter appending:\n");
+            //printPolyList(list.head);
         }
         //add polynomial
         else if(OP_ID == 1){
@@ -612,8 +612,8 @@ int main(int argc, char *argv[]){
             fscanf(input, "%d", &b);
             polynomial *p = addPolynomial(list.head, a, b);
             appendList(&list.head, &list.tail, p);
-            printf("\nAfter adding:\n");
-            printPolyList(list.head);
+            //printf("\nAfter adding:\n");
+            //printPolyList(list.head);
         }
         //substract polynomial
         else if(OP_ID == 2){
@@ -622,8 +622,8 @@ int main(int argc, char *argv[]){
             fscanf(input, "%d", &b);
             polynomial *p = subPolynomial(list.head, a, b);
             appendList(&list.head, &list.tail, p);
-            printf("\nAfter substracting:\n");
-            printPolyList(list.head);
+            //printf("\nAfter substracting:\n");
+            //printPolyList(list.head);
         }
         //multiply polynomial
         else if(OP_ID == 3){
@@ -632,16 +632,16 @@ int main(int argc, char *argv[]){
             fscanf(input, "%d", &b);
             polynomial *p = mulPolynomial(list.head, a, b);
             appendList(&list.head, &list.tail, p);
-            printf("\nAfter multipling:\n");
-            printPolyList(list.head);
+            //printf("\nAfter multipling:\n");
+            //printPolyList(list.head);
         }
         //delete polynomial
         else if(OP_ID == 4){
             int delete_index;
             fscanf(input, "%d", &delete_index);
             deletePolynomial(&list.head, &list.tail, delete_index);
-            printf("\nAfter deleting:\n");
-            printPolyList(list.head);
+            //printf("\nAfter deleting:\n");
+            //printPolyList(list.head);
         }
     }
     fclose(input);
