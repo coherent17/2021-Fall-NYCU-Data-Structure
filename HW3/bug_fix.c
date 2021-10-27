@@ -435,8 +435,10 @@ polynomial *mulPolynomial(listnode *head, int a, int b){
     }
 
 
+
     //do the multiplication term by term
     while(temp_a){
+        temp_b = poly_b->head;
         while(temp_b){
             node *newnode = createNode(temp_a->coefficient * temp_b->coefficient, temp_a->exp_x + temp_b->exp_x, temp_a->exp_y + temp_b->exp_y, temp_a->exp_z + temp_b->exp_z);
 
@@ -444,6 +446,7 @@ polynomial *mulPolynomial(listnode *head, int a, int b){
 
             //first element entry the linkedlist
             if(result->head == NULL){
+                result->count += 1;
                 result->head = newnode;
                 result->tail = newnode;
             }
@@ -465,6 +468,7 @@ polynomial *mulPolynomial(listnode *head, int a, int b){
                             newnode->next = result->head;
                             result->head = newnode;
                             temp_b = temp_b->next;
+                            result->count += 1;
                             continue;
                         }
                         else if(newnode->exp_z < result->head->exp_z){
@@ -475,6 +479,7 @@ polynomial *mulPolynomial(listnode *head, int a, int b){
                         newnode->next = result->head;
                         result->head = newnode;
                         temp_b = temp_b->next;
+                        result->count += 1;
                         continue;
                     }
                     else if(newnode->exp_y < result->head->exp_y){
@@ -485,58 +490,63 @@ polynomial *mulPolynomial(listnode *head, int a, int b){
                     newnode->next = result->head;
                     result->head = newnode;
                     temp_b = temp_b->next;
+                    result->count += 1;
                     continue;
                 }
                 else if(newnode->exp_x < result->head->exp_x){
                     //insert after head somewhere
                 }
-            }
-            //check where to insert the node in the linkedlist
-            node *current = result->head->next;
-            node *prev = result->head;
+                //check where to insert the node in the linkedlist
+                node *current = result->head->next;
+                node *prev = result->head;
 
-            while(current != NULL){
-                if(newnode->exp_x == current->exp_x){
-                    if(newnode->exp_y == current->exp_y){
-                        if(newnode->exp_z == current->exp_z){
-                            //same term:
-                            current->coefficient += newnode->coefficient;
-                            free(newnode);
-                            break;
+                while(current != NULL){
+                    if(newnode->exp_x == current->exp_x){
+                        if(newnode->exp_y == current->exp_y){
+                            if(newnode->exp_z == current->exp_z){
+                                //same term:
+                                current->coefficient += newnode->coefficient;
+                                free(newnode);
+                                break;
+                            }
+                            else if(newnode->exp_z > current->exp_z){
+                                newnode->next = current;
+                                prev->next = newnode;
+                                result->count += 1;
+                                break;
+                            }
+                            else if(newnode->exp_z < current->exp_z){
+                                //keep finding where to insert
+                            }
                         }
-                        else if(newnode->exp_z > current->exp_z){
+                        else if(newnode->exp_y > current->exp_y){
                             newnode->next = current;
                             prev->next = newnode;
+                            result->count += 1;
                             break;
                         }
-                        else if(newnode->exp_z < current->exp_z){
+                        else if(newnode->exp_y < current->exp_y){
                             //keep finding where to insert
                         }
                     }
-                    else if(newnode->exp_y > current->exp_y){
+                    else if(newnode->exp_x > current->exp_x){
                         newnode->next = current;
                         prev->next = newnode;
+                        result->count += 1;
                         break;
                     }
-                    else if(newnode->exp_y < current->exp_y){
+                    else if(newnode->exp_x < current->exp_x){
                         //keep finding where to insert
                     }
+                    current = current->next;
+                    prev = prev->next;
                 }
-                else if(newnode->exp_x > current->exp_x){
-                    newnode->next = current;
+                // if traverse the all linkedlist, link on the tail
+                if(current == NULL){
                     prev->next = newnode;
-                    break;
+                    result->tail = newnode;
+                    result->count += 1;
                 }
-                else if(newnode->exp_x < current->exp_x){
-                    //keep finding where to insert
-                }
-                current = current->next;
-                prev = prev->next;
-            }
-            // if traverse the all linkedlist, link on the tail
-            if(current == NULL){
-                prev->next = newnode;
-                result->tail = newnode;
             }
             temp_b = temp_b->next;
         }
