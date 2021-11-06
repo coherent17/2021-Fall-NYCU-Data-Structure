@@ -7,17 +7,15 @@ CHECKFLAGS = --leak-check=full -s
 	$(CC) $(CFLAGS) $< -o $@
 
 do:
-	./0811562.exe sample.in sample.out
-	./0811562.exe testcase1 out1
-	./0811562.exe testcase2 out2
+	./0811562.exe sample.in sample_out
+	./0811562.exe test.in test_out
 
 check:
-	$(CHECKCC) $(CHECKFLAGS) ./0811562.exe sample.in sample.out
-	$(CHECKCC) $(CHECKFLAGS) ./0811562.exe testcase1 out1
-	$(CHECKCC) $(CHECKFLAGS) ./0811562.exe testcase2 out2
+	$(CHECKCC) $(CHECKFLAGS) ./0811562.exe sample.in sample_out
+	$(CHECKCC) $(CHECKFLAGS) ./0811562.exe test.in test_out
 
 see:
-	cat sample.out
+	cat sample_out
 
 clean:
-	rm 0811562.exe  sample.out out*
+	rm 0811562.exe  *_out
