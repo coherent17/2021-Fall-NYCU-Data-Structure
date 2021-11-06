@@ -35,6 +35,7 @@ void initPolynomial(polynomial *p){
     p->count = 0;
 }
 
+
 void printPolynomial(polynomial *p){
     node *temp = p->head;
     while(temp!=NULL){
@@ -545,7 +546,7 @@ void deletePolynomial(listnode **head, listnode **tail, int delete_index){
     //if not delete the head node
     //traverse to find which node to delete:
     //make sure to find the previous pointer to connect the linkedlist
-    for (int i = 0; i < delete_index - 1;i++){
+    for (int i = 0; i < delete_index -1;i++){
         temp = temp->next;
     }
     listnode *prev = temp;
@@ -554,9 +555,6 @@ void deletePolynomial(listnode **head, listnode **tail, int delete_index){
     //if delete node is the last node in the linkedlist
     if(temp->next == NULL){
         *tail = prev;
-    }
-    else{
-        *tail = prev->next;
     }
     delete_all_node(temp->polynomial);
     free(temp);
