@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
 
 #define SIZE 10005
 
@@ -24,6 +23,7 @@ void heapify(int *MaxHeap, int size, int i){
     //check need to swap or not?
     if(largest!=i){
         swap(&MaxHeap[i], &MaxHeap[largest]);
+        heapify(MaxHeap, size, largest);
     }
 }
 
