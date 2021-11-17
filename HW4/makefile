@@ -6,6 +6,8 @@ CFLAGS = -g -Wall
 
 do:
 	./0811562.exe sample.in sample.out
+	./0811562.exe testcase1 1_out
+	./0811562.exe testcase2 2_out2
 
 see:
 	cat sample_out
