@@ -18,6 +18,10 @@ typedef struct _Graph{
     EdgeNode *edge;
 }Graph;
 
+typedef struct _Arrays{
+    int *distance;
+    int *previous;
+}Arrays;
 
 int getVertexNum(char *input_filename){
     int vertex_count = 0;
@@ -77,7 +81,21 @@ void readfile(char *input_filename, Graph *g){
     fclose(input);
 }
 
-void BellmanFord(Graph *g){
+void printArray(int *array, int size){
+    for (int i = 0; i < size;i++){
+        printf("%d ", array[i]);
+    }
+    printf("\n");
+}
+
+void printReverseArray(int *array, int size){
+    for (int i = size - 1; i >= 0;i--){
+        printf("%d ", array[i]);
+    }
+    printf("\n");
+}
+
+Arrays *BellmanFord(Graph *g){
     int *distance = malloc(sizeof(int) * g->vertex_num);
     int *previous = malloc(sizeof(int) * g->vertex_num);
 
@@ -88,7 +106,28 @@ void BellmanFord(Graph *g){
     }
     //disance from start to start is 0
     distance[0] = 0;
-    
+
+    for (int i = 1; i < g->vertex_num - 1;i++){
+        for (int j = 0; j < g->edge_num;j++){
+            if(distance[g->edge[j].start]!=INF && distance[g->edge[j].end]>distance[g->edge[j].start] + g->edge[j].edge_weight){
+                distance[g->edge[j].end] = distance[g->edge[j].start] + g->edge[j].edge_weight;
+                previous[g->edge[j].end] = g->edge[j].start;
+            }
+        }
+    }
+
+    //check whether there exist negative cycle
+    for (int i = 0; i < g->edge_num;i++){
+        if(distance[g->edge[i].start]!=INF && distance[g->edge[i].end]>distance[g->edge[i].start] + g->edge[i].edge_weight){
+            printf("Negative weight cycle detected!\n");
+            return NULL;
+        }
+    }
+
+    Arrays *returnArray = malloc(sizeof(Arrays));
+    returnArray->distance = distance;
+    returnArray->previous = previous;
+    return returnArray;
 }
 
 void printGraphData(Graph *g){
@@ -98,6 +137,26 @@ void printGraphData(Graph *g){
     for (int i = 0; i < g->edge_num;i++){
         printf("(%d %d %d)\n", (g->edge[i]).start, (g->edge[i]).end, (g->edge[i]).edge_weight);
     }
+}
+
+int *getShortestPath(int *previous, int destination, int *path_node_count){
+    int path_index = 0;
+    int temp = previous[destination];
+    //calculate how many node to pass
+    while(temp!=0){
+        path_index++;
+        temp = previous[temp];
+    }
+    int *path = malloc(sizeof(int) * (path_index + 1));
+
+    temp = previous[destination];
+    while(temp!=0){
+        path[path_index] = temp;
+        path_index++;
+        temp = previous[temp];
+    }
+    *path_node_count = path_index + 1;
+    return path;
 }
 
 int main(int argc, char *argv[]){
@@ -117,6 +176,32 @@ int main(int argc, char *argv[]){
     //construct edge list
     readfile(input_filename, Mygraph);
     printGraphData(Mygraph);
+
+    //BellmanFord Algorithm:
+    int *distance = NULL;
+    int *previous = NULL;
+    Arrays *temp = BellmanFord(Mygraph);
+    if(temp==NULL){
+        printf("Negative cycle detected\n");
+    }
+    else{
+        distance = temp->distance;
+        previous = temp->previous;
+        printArray(distance, Mygraph->vertex_num);
+        printArray(previous, Mygraph->vertex_num);
+
+        int *path = NULL;
+        int path_node_count = 0;
+        path = getShortestPath(previous, 1, &path_node_count);
+        printReverseArray(path, path_node_count);
+        path = getShortestPath(previous, 2, &path_node_count);
+        printReverseArray(path, path_node_count);
+        path = getShortestPath(previous, 3, &path_node_count);
+        printReverseArray(path, path_node_count);
+        path = getShortestPath(previous, 4, &path_node_count);
+        printReverseArray(path, path_node_count);
+    }
+
 
     //free the allocated memory
     free(Mygraph->edge);
