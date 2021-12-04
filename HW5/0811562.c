@@ -88,14 +88,14 @@ void printArray(int *array, int size){
     printf("\n");
 }
 
-void printReverseArray(int *array, int size){
-    for (int i = size - 1; i >= 0;i--){
-        printf("%d ", array[i]);
+void printReverseArray(FILE *outputfileptr, int *array, int size){
+    for (int i = size - 1; i >= 1;i--){
+        fprintf(outputfileptr, "%d-", array[i]);
     }
-    printf("\n");
+    fprintf(outputfileptr, "%d", array[0]);
 }
 
-Arrays *BellmanFord(Graph *g){
+Arrays *BellmanFord(Graph *g, int *negative_cycle_returnSize){
     int *distance = malloc(sizeof(int) * g->vertex_num);
     int *previous = malloc(sizeof(int) * g->vertex_num);
 
@@ -116,17 +116,58 @@ Arrays *BellmanFord(Graph *g){
         }
     }
 
-    //check whether there exist negative cycle
-    for (int i = 0; i < g->edge_num;i++){
-        if(distance[g->edge[i].start]!=INF && distance[g->edge[i].end]>distance[g->edge[i].start] + g->edge[i].edge_weight){
-            printf("Negative weight cycle detected!\n");
-            return NULL;
-        }
-    }
-
+    //using struct to pack the two return arrays
     Arrays *returnArray = malloc(sizeof(Arrays));
     returnArray->distance = distance;
     returnArray->previous = previous;
+
+    //check whether there exist negative cycle
+    int negative_cycle_vertex = -1;
+    for (int i = 0; i < g->edge_num;i++){
+        if(distance[g->edge[i].start]!=INF && distance[g->edge[i].end]>distance[g->edge[i].start] + g->edge[i].edge_weight){
+            negative_cycle_vertex = g->edge[i].end;
+            //if there exist the negative cycle, the distance and previous is no longer import
+            //instead, store the negative cycle path in the returnArray->distance
+            //set returnArray->previous as NULL
+            returnArray->previous = NULL;
+            returnArray->distance = NULL;
+            break;
+        }
+    }
+
+    //if there exist the negative cycle, find it:
+    if(negative_cycle_vertex!=-1){
+        for (int i = 0; i < g->vertex_num;i++){
+            negative_cycle_vertex = previous[negative_cycle_vertex];
+        }
+
+        //how many nodes in the negative cycle?
+        int cycle_length = 0;
+
+        int vertex = negative_cycle_vertex;
+        while(1){
+            cycle_length++;
+            if(vertex==negative_cycle_vertex && cycle_length>1){
+                break;
+            }
+            vertex = previous[vertex];
+        }
+        *negative_cycle_returnSize = cycle_length;
+        int *negative_cycle = malloc(sizeof(int) * cycle_length);
+        cycle_length = 0;
+        vertex = negative_cycle_vertex;
+        while(1){
+            negative_cycle[cycle_length] = vertex;
+            cycle_length++;
+            if(vertex==negative_cycle_vertex && cycle_length>1){
+                break;
+            }
+            vertex = previous[vertex];
+        }
+        returnArray->distance = negative_cycle;
+        free(distance);
+        free(previous);
+    }
     return returnArray;
 }
 
@@ -141,22 +182,47 @@ void printGraphData(Graph *g){
 
 int *getShortestPath(int *previous, int destination, int *path_node_count){
     int path_index = 0;
-    int temp = previous[destination];
+    int temp = destination;
     //calculate how many node to pass
     while(temp!=0){
         path_index++;
         temp = previous[temp];
     }
-    int *path = malloc(sizeof(int) * (path_index + 1));
+    int *path = malloc(sizeof(int) * (path_index + 2));
 
-    temp = previous[destination];
+    path_index = 0;
+    temp = destination;
     while(temp!=0){
         path[path_index] = temp;
         path_index++;
         temp = previous[temp];
     }
+    path[path_index] = 0;
     *path_node_count = path_index + 1;
     return path;
+}
+
+void outputShortestPath(char *output_filename, int vertex_count, int *previous, int *distance){
+    FILE *outputfileptr = fopen(output_filename, "w");
+    int *path = NULL;
+    int path_node_count = 0;
+    for (int i = 1; i < vertex_count;i++){
+        path = getShortestPath(previous, i, &path_node_count);
+        //start to write outputfile:
+        printReverseArray(outputfileptr, path, path_node_count);
+        fprintf(outputfileptr, " %d", distance[i]);
+        if(i<vertex_count-1){
+            fprintf(outputfileptr, "\n");
+        }
+        free(path);
+    }
+    fclose(outputfileptr);
+}
+
+void outputNegativeCycle(char *output_filename, int *negative_cycle, int cycle_length){
+    FILE *outputfileptr = fopen(output_filename, "w");
+    printReverseArray(outputfileptr, negative_cycle, cycle_length);
+    fclose(outputfileptr);
 }
 
 int main(int argc, char *argv[]){
@@ -180,31 +246,30 @@ int main(int argc, char *argv[]){
     //BellmanFord Algorithm:
     int *distance = NULL;
     int *previous = NULL;
-    Arrays *temp = BellmanFord(Mygraph);
-    if(temp==NULL){
-        printf("Negative cycle detected\n");
+    int negative_cycle_returnSize = 0;
+    Arrays *temp = BellmanFord(Mygraph, &negative_cycle_returnSize);
+
+    //if encounter the negative cycle
+    if(negative_cycle_returnSize!=0){
+        //the distance array is the negative cycle of the graph
+        int *negative_cycle = temp->distance;
+        outputNegativeCycle(output_filename, negative_cycle, negative_cycle_returnSize);
+        free(temp->distance);
     }
+    //no negative cycle -> output the shortest path
     else{
         distance = temp->distance;
         previous = temp->previous;
         printArray(distance, Mygraph->vertex_num);
         printArray(previous, Mygraph->vertex_num);
-
-        int *path = NULL;
-        int path_node_count = 0;
-        path = getShortestPath(previous, 1, &path_node_count);
-        printReverseArray(path, path_node_count);
-        path = getShortestPath(previous, 2, &path_node_count);
-        printReverseArray(path, path_node_count);
-        path = getShortestPath(previous, 3, &path_node_count);
-        printReverseArray(path, path_node_count);
-        path = getShortestPath(previous, 4, &path_node_count);
-        printReverseArray(path, path_node_count);
+        outputShortestPath(output_filename, Mygraph->vertex_num, previous, distance);
     }
-
 
     //free the allocated memory
     free(Mygraph->edge);
     free(Mygraph);
+    free(distance);
+    free(previous);
+    free(temp);
     return 0;
 }
