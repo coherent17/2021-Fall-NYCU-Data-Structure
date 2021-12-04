@@ -241,7 +241,7 @@ int main(int argc, char *argv[]){
 
     //construct edge list
     readfile(input_filename, Mygraph);
-    printGraphData(Mygraph);
+    //printGraphData(Mygraph);
 
     //BellmanFord Algorithm:
     int *distance = NULL;
@@ -260,8 +260,8 @@ int main(int argc, char *argv[]){
     else{
         distance = temp->distance;
         previous = temp->previous;
-        printArray(distance, Mygraph->vertex_num);
-        printArray(previous, Mygraph->vertex_num);
+        //printArray(distance, Mygraph->vertex_num);
+        //printArray(previous, Mygraph->vertex_num);
         outputShortestPath(output_filename, Mygraph->vertex_num, previous, distance);
     }
 
