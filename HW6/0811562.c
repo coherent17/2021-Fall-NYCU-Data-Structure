@@ -65,8 +65,8 @@ int main(int argc, char *argv[]){
 	length = readfile(input_filename, data);
 	//printArray(data, length);
 	quicksort(data, 0, length - 1);
-	printArray(data, length);
-	printf("swap count = %d\n", global_swap_count);
+	//printArray(data, length);
+	//printf("swap count = %d\n", global_swap_count);
 	FILE *output = fopen(output_filename, "w");
 	fprintf(output,"%d", global_swap_count);
 	fclose(output);
