@@ -42,8 +42,10 @@ void quicksort(int *data, int left, int right){
 			while(data[j]>data[pivot])
 				j--;
 			if(i<j){
-				swap(&data[i], &data[j]);
-				//printArray(data, length);
+				if(data[i]!=data[j]){
+					swap(&data[i], &data[j]);
+					//printArray(data, length);
+				}
 			}
 		}
 		if(data[pivot]!=data[j]){
