@@ -5,6 +5,7 @@
 
 #define TABLE_SIZE 2000000
 #define MAX_LENGTH 20
+#define DEBUG_MODE false
 
 typedef struct node{
     char string[MAX_LENGTH];
@@ -138,7 +139,10 @@ int main(int argc, char *argv[]){
         hashTableInsert(buffer);
     }
     fclose(input);
-    printHashTable();
+
+    if(DEBUG_MODE==true){
+        printHashTable();
+    }
 
     //search in the hashtable
     while(fscanf(target, "%s", buffer)!=EOF){
