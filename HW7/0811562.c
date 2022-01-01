@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 
 #define TABLE_SIZE 2000000
 #define MAX_LENGTH 20
@@ -15,7 +16,7 @@ node *hashTable[TABLE_SIZE];
 unsigned int hash(char *string){
     unsigned int hash_value = 0;
     for (int i = 0; i < strlen(string);i++){
-        hash_value += 43 * string[i] * string[i] * string[i] + 13 * string[i] * string[i] + 17 * string[i];
+        hash_value += 43 * string[i] * string[i] * string[i] + 13 * string[i] * string[i] + 17 * string[i] + string[i] * strlen(string) * strlen(string);
     }
     return hash_value%TABLE_SIZE;
 }
@@ -71,6 +72,35 @@ void hashTableInsert(char *string){
     }
 }
 
+bool arrayCompare(int *a, int *b){
+    for (int i = 0; i < 26;i++){
+        if(a[i]!=b[i]){
+            return false;
+        }
+    }
+    return true;
+}
+
+bool stringCompare(char *s1, char *s2){
+    if(strlen(s1)!=strlen(s2)){
+        return false;
+    }
+    else{
+        int s1_char[26] = {0};
+        int s2_char[26] = {0};
+        for (int i = 0; i < strlen(s1);i++){
+            s1_char[s1[i] - 97]++;
+            s2_char[s2[i] - 97]++;
+        }
+        if(arrayCompare(s1_char,s2_char)){
+            return true;
+        }
+        else{
+            return false;
+        }
+    }
+}
+
 void hashTableLookup(char *string, FILE *output){
     //calculate the index by hash function:
     int index = hash(string);
@@ -81,7 +111,9 @@ void hashTableLookup(char *string, FILE *output){
     else{
         node *temp = hashTable[index];
         while(temp!=NULL){
-            fprintf(output, "%s ", temp->string);
+            if(stringCompare(string,temp->string)){
+                fprintf(output, "%s ", temp->string);
+            }
             temp = temp->next;
         }
     }
