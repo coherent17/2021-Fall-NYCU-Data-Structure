@@ -17,7 +17,7 @@ node *hashTable[TABLE_SIZE];
 unsigned int hash(char *string){
     unsigned int hash_value = 0;
     for (int i = 0; i < strlen(string);i++){
-        hash_value += 43 * string[i] * string[i] * string[i] + 13 * string[i] * string[i] + 17 * string[i] + string[i] * strlen(string) * strlen(string);
+        hash_value += 43 * string[i] * string[i] * string[i] + 13 * string[i] * string[i] + 17 * string[i];
     }
     return hash_value%TABLE_SIZE;
 }
@@ -110,12 +110,17 @@ void hashTableLookup(char *string, FILE *output){
         return;
     }
     else{
+        bool print0 = true;
         node *temp = hashTable[index];
         while(temp!=NULL){
             if(stringCompare(string,temp->string)){
+                print0 = false;
                 fprintf(output, "%s ", temp->string);
             }
             temp = temp->next;
+        }
+        if(print0){
+            fprintf(output, "0");
         }
     }
 }
