@@ -3,7 +3,7 @@
 #include <string.h>
 #include <stdbool.h>
 
-#define TABLE_SIZE 2000000
+#define TABLE_SIZE 10000000
 #define MAX_LENGTH 20
 #define DEBUG_MODE false
 
@@ -17,8 +17,9 @@ node *hashTable[TABLE_SIZE];
 unsigned int hash(char *string){
     unsigned int hash_value = 0;
     for (int i = 0; i < strlen(string);i++){
-        hash_value += 43 * string[i] * string[i] * string[i] + 13 * string[i] * string[i] + 17 * string[i];
+        hash_value += 853 * string[i] * string[i] + 967 * string[i];
     }
+    hash_value *= strlen(string) * 1223;
     return hash_value%TABLE_SIZE;
 }
 
@@ -33,7 +34,7 @@ void printHashTable(){
     for (int i = 0; i < TABLE_SIZE;i++){
         //if there is nothing in the hash table, do nothing
         if(hashTable[i]!=NULL){
-            printf("%8d: ", i);
+            printf("%10d: ", i);
             node *temp = hashTable[i];
             while(temp!=NULL){
                 printf("%s - ", temp->string);
@@ -144,6 +145,8 @@ int main(int argc, char *argv[]){
         hashTableInsert(buffer);
     }
     fclose(input);
+
+    //printf("finish read file\n");
 
     if(DEBUG_MODE==true){
         printHashTable();
