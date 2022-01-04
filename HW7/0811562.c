@@ -13,6 +13,7 @@ typedef struct node{
 } node;
 
 node *hashTable[TABLE_SIZE];
+node *chainTail[TABLE_SIZE];
 
 unsigned int hash(char *string){
     unsigned int hash_value = 0;
@@ -26,6 +27,7 @@ unsigned int hash(char *string){
 void initHashTable(){
     for (int i = 0; i < TABLE_SIZE;i++){
         hashTable[i] = NULL;
+        chainTail[i] = hashTable[i];
     }
 }
 
@@ -57,20 +59,14 @@ void hashTableInsert(char *string){
     if(hashTable[index]==NULL){
         hashTable[index] = newNode;
         newNode->next = NULL;
+        chainTail[index] = newNode;
     }
 
     else{
         //insert the data in the tail of the linkedlist
-        node *temp = hashTable[index];
-        while(temp!=NULL){
-            // find the tail of the linkedlist
-            if(temp->next==NULL){
-                break;
-            }
-            temp = temp->next;
-        }
-        temp->next = newNode;
+        chainTail[index]->next = newNode;
         newNode->next = NULL;
+        chainTail[index] = newNode;
     }
 }
 
